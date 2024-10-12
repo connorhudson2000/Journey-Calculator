@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Journey Cost & Emissions Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Light/Dark Mode Stylesheet -->
+    <link rel="stylesheet" href="styles.css" id="theme-link">
+</head>
+<body>
+    <div class="container">
+        <h1>Journey Cost & Emissions Calculator</h1>
+
+        <!-- Light/Dark Mode Toggle -->
+        <div class="theme-toggle">
+            <label class="switch">
+                <input type="checkbox" id="theme-switch">
+                <span class="slider round"></span>
+            </label>
+            <span id="theme-label">Light Mode</span>
+        </div>
+
+        <form id="journey-form">
+            <!-- Fuel Efficiency Input -->
+            <div class="input-group">
+                <label for="fuel-efficiency">Fuel Efficiency:</label>
+                <input type="number" id="fuel-efficiency" required>
+                <select id="efficiency-unit">
+                    <option value="mpg" selected>MPG</option>
+                    <option value="l_per_100km">L/100km</option>
+                </select>
+            </div>
+
+            <!-- Fuel Price Input -->
+            <div class="input-group">
+                <label for="fuel-price">Fuel Price:</label>
+                <input type="number" id="fuel-price" required>
+                <select id="fuel-price-unit">
+                    <option value="pence_per_liter" selected>Pence per Liter</option>
+                    <option value="pence_per_gallon">Pence per Gallon</option>
+                </select>
+            </div>
+
+            <!-- Distance Display -->
+            <div class="input-group">
+                <label for="distance">Distance:</label>
+                <input type="number" id="distance" readonly>
+                <select id="distance-unit">
+                    <option value="miles" selected>Miles</option>
+                    <option value="kilometers">Kilometers</option>
+                </select>
+            </div>
+
+            <!-- Location Inputs -->
+            <div class="input-group">
+                <label for="start-location">Start Location:</label>
+                <input type="text" id="start-location" placeholder="Enter start location" aria-label="Start Location">
+            </div>
+            <div class="input-group">
+                <label for="end-location">End Location:</label>
+                <input type="text" id="end-location" placeholder="Enter end location" aria-label="End Location">
+            </div>
+
+            <!-- Additional Stops Section -->
+            <div id="stops-section">
+                <h3>Additional Stops (Optional)</h3>
+                <div id="stops-container">
+                    <!-- Stops will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Button Group for Better Layout -->
+            <div class="button-group">
+                <button type="button" id="add-stop-btn">Add Stop</button>
+                <button type="button" id="calculate-btn">Calculate</button>
+            </div>
+        </form>
+
+        <!-- Error Message Display -->
+        <div id="error-message" role="alert"></div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" aria-label="Loading"></div>
+
+        <!-- Results Display -->
+        <div id="results">
+            <p id="distance-result"></p>
+            <p id="cost-result"></p>
+            <p id="emissions-result"></p>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Include the Google Maps API with Places and the callback to initMap -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAd3ElfwWCJUlSDe1mXsYNTVAu-lqUhInI&libraries=places&callback=initMap">
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
