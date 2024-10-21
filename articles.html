@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Articles - JourneyCalc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Light/Dark Mode Stylesheet -->
+    <link rel="stylesheet" href="styles.css" id="theme-link">
+    <style>
+        .articles-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .article-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .article-item:hover {
+            transform: translateY(-5px);
+        }
+        .article-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .article-content {
+            padding: 1rem;
+        }
+        .article-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .article-excerpt {
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <a href="index.html">JourneyCalc</a>
+            </div>
+            <input type="checkbox" id="navbar-toggle" class="navbar-toggle">
+            <label for="navbar-toggle" class="navbar-icon" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Main Tool</a></li>
+                <li><a href="articles.html" class="active">Articles</a></li>
+                <li><a href="resources.html">Resources</a></li>
+            </ul>
+            <!-- Light/Dark Mode Toggle within Header -->
+            <div class="theme-toggle header-theme-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span id="theme-label">Light Mode</span>
+            </div>
+            <!-- Help Icon with "?" Character -->
+            <div class="help-icon">
+                <button id="help-button" aria-label="How to use the tool">
+                    ?
+                </button>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Articles</h1>
+        <!-- Articles List -->
+        <div class="articles-list">
+            <!-- Article Item -->
+            <div class="article-item">
+                <img src="10tips.png" alt="Fuel Efficiency" class="article-image">
+                <div class="article-content">
+                    <h2><a href="article1.html" class="article-link">10 Ways to Maximize Your Fuel Efficiency</a></h2>
+                    <p class="article-excerpt">
+                        Learn how to get the most out of every drop of fuel with these top tips...
+                    </p>
+                </div>
+            </div>
+            <!-- Additional Article Items -->
+            <div class="article-item">
+                <img src="co2emissions.jpg" alt="CO2 Emissions" class="article-image">
+                <div class="article-content">
+                    <h2><a href="article2.html" class="article-link">Understanding CO₂ Emissions and Your Car</a></h2>
+                    <p class="article-excerpt">
+                        A deep dive into how your vehicle contributes to carbon emissions and what you can do about it...
+                    </p>
+                </div>
+            </div>
+            <div class="article-item">
+                <img src="fuelprice.jpg" alt="Fuel Price Fluctuations" class="article-image">
+                <div class="article-content">
+                    <h2><a href="article3.html" class="article-link">Understanding the Causes Behind Fuel Price Fluctuations</a></h2>
+                    <p class="article-excerpt">
+                        Explore the various factors that cause fuel prices to rise and fall, helping you make informed decisions at the pump...
+                    </p>
+                </div>
+            </div>
+            <!-- Add more articles as needed -->
+        </div>
+    </div>
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+        <div class="modal-content">
+            <span class="close-button" id="close-help" aria-label="Close">&times;</span>
+            <h2 id="help-modal-title">How to Use the Articles Section</h2>
+            <p>
+                Welcome to our Articles page! Here, you'll find a wealth of information on topics related to driving, fuel efficiency, emissions, and more.
+            </p>
+            <p>
+                Click on any article title to read the full content. We regularly update this section, so be sure to check back often for new articles.
+            </p>
+        </div>
+    </div>
+    <!-- Include your existing JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>

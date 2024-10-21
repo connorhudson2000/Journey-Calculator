@@ -8,10 +8,47 @@
     <link rel="stylesheet" href="styles.css" id="theme-link">
 </head>
 <body>
+    
+    <!-- Header Section -->
+<header>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="index.html">JourneyCalc</a>
+        </div>
+        <input type="checkbox" id="navbar-toggle" class="navbar-toggle">
+        <label for="navbar-toggle" class="navbar-icon" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <ul class="navbar-menu">
+            <li><a href="index.html" class="active">Main Tool</a></li>
+            <li><a href="articles.html">Articles</a></li>
+            <li><a href="resources.html">Resources</a></li>
+        </ul>
+        <!-- Light/Dark Mode Toggle within Header -->
+        <div class="theme-toggle header-theme-toggle">
+            <label class="switch">
+                <input type="checkbox" id="theme-switch">
+                <span class="slider round"></span>
+            </label>
+            <span id="theme-label">Light Mode</span>
+        </div>
+        <!-- Help Icon with "?" Character -->
+        <div class="help-icon">
+            <button id="help-button" aria-label="How to use the tool">
+                ?
+            </button>
+        </div>
+    </nav>
+</header>
+
+
     <div class="container">
         <h1>Journey Cost & Emissions Calculator</h1>
 
-        <!-- Light/Dark Mode Toggle -->
+        <!-- Light/Dark Mode Toggle (if you prefer it outside the header) -->
+        <!-- 
         <div class="theme-toggle">
             <label class="switch">
                 <input type="checkbox" id="theme-switch">
@@ -19,14 +56,16 @@
             </label>
             <span id="theme-label">Light Mode</span>
         </div>
+        -->
 
         <form id="journey-form">
             <!-- Fuel Efficiency Input -->
             <div class="input-group">
                 <label for="fuel-efficiency">Fuel Efficiency:</label>
-                <input type="number" id="fuel-efficiency" required>
+                <input type="number" id="fuel-efficiency" required min="0" step="any">
                 <select id="efficiency-unit">
-                    <option value="mpg" selected>MPG</option>
+                    <option value="mpg_uk" selected>MPG (UK)</option>
+                    <option value="mpg_us">MPG (US)</option>
                     <option value="l_per_100km">L/100km</option>
                 </select>
             </div>
@@ -34,10 +73,11 @@
             <!-- Fuel Price Input -->
             <div class="input-group">
                 <label for="fuel-price">Fuel Price:</label>
-                <input type="number" id="fuel-price" required>
+                <input type="number" id="fuel-price" required min="0" step="any">
                 <select id="fuel-price-unit">
-                    <option value="pence_per_liter" selected>Pence per Liter</option>
-                    <option value="pence_per_gallon">Pence per Gallon</option>
+                    <option value="pence_per_liter" selected>Pence per Liter (£)</option>
+                    <option value="cents_per_liter">Cents per Liter (€)</option>
+                    <option value="cents_per_gallon">Cents per Gallon ($)</option>
                 </select>
             </div>
 
@@ -73,6 +113,7 @@
             <div class="button-group">
                 <button type="button" id="add-stop-btn">Add Stop</button>
                 <button type="button" id="calculate-btn">Calculate</button>
+                <button type="button" id="reset-btn">Reset</button>
             </div>
         </form>
 
@@ -85,10 +126,41 @@
         <!-- Results Display -->
         <div id="results">
             <p id="distance-result"></p>
+            <p id="travel-time-result"></p>
             <p id="cost-result"></p>
             <p id="emissions-result"></p>
         </div>
+
+        <!-- Unit Conversion Buttons -->
+        <div class="button-group">
+            <button type="button" id="convert-distance-btn">Convert Distance</button>
+            <!-- "Convert Cost" button removed as per request -->
+        </div>
+
         <div id="map"></div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+        <div class="modal-content">
+            <span class="close-button" id="close-help" aria-label="Close">&times;</span>
+            <h2 id="help-modal-title">How to Use the Journey Cost & Emissions Calculator</h2>
+            <p>
+                Welcome to JourneyCalc! Here's how to make the most out of our tool:
+            </p>
+            <ol>
+                <li><strong>Enter Fuel Efficiency:</strong> Input your vehicle's fuel efficiency and select the appropriate unit (MPG UK, MPG US, or L/100km).</li>
+                <li><strong>Enter Fuel Price:</strong> Provide the current fuel price based on your currency and unit preference.</li>
+                <li><strong>Specify Distance:</strong> Enter the total distance of your journey in miles or kilometers.</li>
+                <li><strong>Set Locations:</strong> Input your start and end locations using the autocomplete feature. You can also add additional stops if needed.</li>
+                <li><strong>Calculate:</strong> Click the "Calculate" button to view your journey's total cost, estimated CO₂ emissions, and travel time.</li>
+                <li><strong>Optimize:</strong> Use the "Convert Distance" button to switch between miles and kilometers as per your preference.</li>
+                <li><strong>Explore:</strong> Visit our <a href="articles.html">Articles</a> and <a href="guides.html">Guides</a> sections for more tips and information.</li>
+            </ol>
+            <p>
+                If you have any questions or need further assistance, feel free to reach out!
+            </p>
+        </div>
     </div>
 
     <!-- Include the Google Maps API with Places and the callback to initMap -->
@@ -96,5 +168,6 @@
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAd3ElfwWCJUlSDe1mXsYNTVAu-lqUhInI&libraries=places&callback=initMap">
     </script>
     <script src="script.js"></script>
+
 </body>
 </html>
