@@ -10,57 +10,58 @@
 <body>
     
     <!-- Header Section -->
-<header>
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="index.html">JourneyCalc</a>
-        </div>
-        <input type="checkbox" id="navbar-toggle" class="navbar-toggle">
-        <label for="navbar-toggle" class="navbar-icon" aria-label="Toggle navigation">
-            <span></span>
-            <span></span>
-            <span></span>
-        </label>
-        <ul class="navbar-menu">
-            <li><a href="index.html" class="active">Main Tool</a></li>
-            <li><a href="articles.html">Articles</a></li>
-            <li><a href="resources.html">Resources</a></li>
-        </ul>
-        <!-- Light/Dark Mode Toggle within Header -->
-        <div class="theme-toggle header-theme-toggle">
-            <label class="switch">
-                <input type="checkbox" id="theme-switch">
-                <span class="slider round"></span>
+    <header>
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <a href="index.html">JourneyCalc</a>
+            </div>
+            <input type="checkbox" id="navbar-toggle" class="navbar-toggle">
+            <label for="navbar-toggle" class="navbar-icon" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
             </label>
-            <span id="theme-label">Light Mode</span>
-        </div>
-        <!-- Help Icon with "?" Character -->
-        <div class="help-icon">
-            <button id="help-button" aria-label="How to use the tool">
-                ?
-            </button>
-        </div>
-    </nav>
-</header>
+            <ul class="navbar-menu">
+                <li><a href="index.html" class="active">Main Tool</a></li>
+                <li><a href="articles.html">Articles</a></li>
+                <li><a href="resources.html">Resources</a></li>
+            </ul>
+            <!-- Light/Dark Mode Toggle within Header -->
+            <div class="theme-toggle header-theme-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span id="theme-label">Light Mode</span>
+            </div>
+            <!-- Help Icon with "?" Character -->
+            <div class="help-icon">
+                <button id="help-button" aria-label="How to use the tool">
+                    ?
+                </button>
+            </div>
+        </nav>
+    </header>
 
 
     <div class="container">
         <h1>Journey Cost & Emissions Calculator</h1>
 
-        <!-- Light/Dark Mode Toggle (if you prefer it outside the header) -->
-        <!-- 
-        <div class="theme-toggle">
-            <label class="switch">
-                <input type="checkbox" id="theme-switch">
-                <span class="slider round"></span>
-            </label>
-            <span id="theme-label">Light Mode</span>
-        </div>
-        -->
-
         <form id="journey-form">
-            <!-- Fuel Efficiency Input -->
+            <!-- Distance Mode Selection -->
             <div class="input-group">
+                <label>Distance Mode:</label>
+                <div class="radio-group">
+                    <input type="radio" id="distance-mode-map" name="distance-mode" value="map" checked>
+                    <label for="distance-mode-map">Calculate via Map</label>
+                    
+                    <input type="radio" id="distance-mode-manual" name="distance-mode" value="manual">
+                    <label for="distance-mode-manual">Enter Manually</label>
+                </div>
+            </div>
+
+            <!-- Fuel Efficiency Input -->
+            <div class="input-group" id="fuel-efficiency-group">
                 <label for="fuel-efficiency">Fuel Efficiency:</label>
                 <input type="number" id="fuel-efficiency" required min="0" step="any">
                 <select id="efficiency-unit">
@@ -71,7 +72,7 @@
             </div>
 
             <!-- Fuel Price Input -->
-            <div class="input-group">
+            <div class="input-group" id="fuel-price-group">
                 <label for="fuel-price">Fuel Price:</label>
                 <input type="number" id="fuel-price" required min="0" step="any">
                 <select id="fuel-price-unit">
@@ -81,8 +82,8 @@
                 </select>
             </div>
 
-            <!-- Distance Display -->
-            <div class="input-group">
+            <!-- Distance Input -->
+            <div class="input-group" id="distance-group">
                 <label for="distance">Distance:</label>
                 <input type="number" id="distance" readonly>
                 <select id="distance-unit">
@@ -92,20 +93,22 @@
             </div>
 
             <!-- Location Inputs -->
-            <div class="input-group">
-                <label for="start-location">Start Location:</label>
-                <input type="text" id="start-location" placeholder="Enter start location" aria-label="Start Location">
-            </div>
-            <div class="input-group">
-                <label for="end-location">End Location:</label>
-                <input type="text" id="end-location" placeholder="Enter end location" aria-label="End Location">
-            </div>
+            <div id="map-section">
+                <div class="input-group">
+                    <label for="start-location">Start Location:</label>
+                    <input type="text" id="start-location" placeholder="Enter start location" aria-label="Start Location">
+                </div>
+                <div class="input-group">
+                    <label for="end-location">End Location:</label>
+                    <input type="text" id="end-location" placeholder="Enter end location" aria-label="End Location">
+                </div>
 
-            <!-- Additional Stops Section -->
-            <div id="stops-section">
-                <h3>Additional Stops (Optional)</h3>
-                <div id="stops-container">
-                    <!-- Stops will be added here dynamically -->
+                <!-- Additional Stops Section -->
+                <div id="stops-section">
+                    <h3>Additional Stops (Optional)</h3>
+                    <div id="stops-container">
+                        <!-- Stops will be added here dynamically -->
+                    </div>
                 </div>
             </div>
 
@@ -151,8 +154,7 @@
             <ol>
                 <li><strong>Enter Fuel Efficiency:</strong> Input your vehicle's fuel efficiency and select the appropriate unit (MPG UK, MPG US, or L/100km).</li>
                 <li><strong>Enter Fuel Price:</strong> Provide the current fuel price based on your currency and unit preference.</li>
-                <li><strong>Specify Distance:</strong> Enter the total distance of your journey in miles or kilometers.</li>
-                <li><strong>Set Locations:</strong> Input your start and end locations using the autocomplete feature. You can also add additional stops if needed.</li>
+                <li><strong>Specify Distance:</strong> Choose whether to calculate the distance using the map or enter it manually. If using the map, input your start and end locations, and optionally add additional stops.</li>
                 <li><strong>Calculate:</strong> Click the "Calculate" button to view your journey's total cost, estimated CO₂ emissions, and travel time.</li>
                 <li><strong>Optimize:</strong> Use the "Convert Distance" button to switch between miles and kilometers as per your preference.</li>
                 <li><strong>Explore:</strong> Visit our <a href="articles.html">Articles</a> and <a href="guides.html">Guides</a> sections for more tips and information.</li>

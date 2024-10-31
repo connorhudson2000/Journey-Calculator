@@ -147,6 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Distance Mode Toggle Functionality
+    const distanceModeRadios = document.getElementsByName('distance-mode');
+    distanceModeRadios.forEach(radio => {
+        radio.addEventListener('change', handleDistanceModeChange);
+    });
+
+    // Initialize distance mode based on default selection
+    handleDistanceModeChange();
 });
 
 // Light/Dark mode toggle
@@ -183,9 +192,39 @@ function loadThemePreference() {
     }
 }
 
+// Handle Distance Mode Change
+function handleDistanceModeChange() {
+    const distanceMode = document.querySelector('input[name="distance-mode"]:checked').value;
+    const distanceInput = document.getElementById('distance');
+    const distanceUnit = document.getElementById('distance-unit');
+    const mapSection = document.getElementById('map-section');
+
+    if (distanceMode === 'manual') {
+        // Enable manual distance input
+        distanceInput.readOnly = false;
+        distanceInput.value = '';
+        // Disable map-related inputs
+        mapSection.style.display = 'none';
+        // Clear any existing directions on the map
+        if (directionsRenderer) {
+            directionsRenderer.setDirections({ routes: [] });
+        }
+    } else {
+        // Disable manual distance input
+        distanceInput.readOnly = true;
+        distanceInput.value = '';
+        // Enable map-related inputs
+        mapSection.style.display = 'block';
+    }
+
+    // Clear previous results and errors
+    clearResults();
+    clearError();
+}
+
 // Additional functions for the main page
 // Only define these functions if on the main page
-if (document.getElementById('map')) {
+if (document.getElementById('map') || document.getElementById('journey-form')) {
     // All functions related to map and journey calculations
 
     // Show loading spinner
@@ -208,10 +247,27 @@ if (document.getElementById('map')) {
         document.getElementById('error-message').innerText = '';
     }
 
+    // Display results
+    function displayResults(distanceText, travelTimeText, costText, emissionsText) {
+        document.getElementById('distance-result').innerText = distanceText;
+        document.getElementById('travel-time-result').innerText = travelTimeText;
+        document.getElementById('cost-result').innerText = costText;
+        document.getElementById('emissions-result').innerText = emissionsText;
+    }
+
+    // Clear results display
+    function clearResults() {
+        document.getElementById('distance-result').innerText = '';
+        document.getElementById('travel-time-result').innerText = '';
+        document.getElementById('cost-result').innerText = '';
+        document.getElementById('emissions-result').innerText = '';
+    }
+
     // Validate form inputs
     function validateInputs() {
         const fuelEfficiency = parseFloat(document.getElementById('fuel-efficiency').value);
         const fuelPrice = parseFloat(document.getElementById('fuel-price').value);
+        const distanceMode = document.querySelector('input[name="distance-mode"]:checked').value;
 
         if (isNaN(fuelEfficiency) || fuelEfficiency <= 0) {
             displayError('Please enter a valid fuel efficiency.');
@@ -223,13 +279,21 @@ if (document.getElementById('map')) {
             return false;
         }
 
-        // Validate start and end locations
-        const startLocationInput = document.getElementById('start-location').value;
-        const endLocationInput = document.getElementById('end-location').value;
+        if (distanceMode === 'manual') {
+            const manualDistance = parseFloat(document.getElementById('distance').value);
+            if (isNaN(manualDistance) || manualDistance <= 0) {
+                displayError('Please enter a valid distance.');
+                return false;
+            }
+        } else {
+            // Validate start and end locations
+            const startLocationInput = document.getElementById('start-location').value;
+            const endLocationInput = document.getElementById('end-location').value;
 
-        if (!startLocationInput || !endLocationInput) {
-            displayError('Please enter valid start and end locations.');
-            return false;
+            if (!startLocationInput || !endLocationInput) {
+                displayError('Please enter valid start and end locations.');
+                return false;
+            }
         }
 
         return true;
@@ -274,8 +338,10 @@ if (document.getElementById('map')) {
 
     // Calculate journey details
     function calculate() {
-        // Clear previous errors and show loading spinner
+        // Clear previous errors and results
         clearError();
+        clearResults();
+
         if (!validateInputs()) return;
         showLoadingSpinner();
 
@@ -285,58 +351,84 @@ if (document.getElementById('map')) {
         const fuelPrice = parseFloat(document.getElementById('fuel-price').value);
         const fuelPriceUnit = document.getElementById('fuel-price-unit').value;
 
-        const startPlace = startAutocomplete.getPlace();
-        const endPlace = endAutocomplete.getPlace();
+        const distanceMode = document.querySelector('input[name="distance-mode"]:checked').value;
 
-        // Validate that start and end places are valid
-        if (!startPlace || !startPlace.geometry || !endPlace || !endPlace.geometry) {
+        if (distanceMode === 'manual') {
+            // Use manually entered distance
+            const manualDistance = parseFloat(document.getElementById('distance').value);
+            calculatedDistanceKm = convertToKilometers(manualDistance, document.getElementById('distance-unit').value);
+            performCalculations(
+                fuelEfficiency,
+                fuelEfficiencyUnit,
+                fuelPrice,
+                fuelPriceUnit,
+                calculatedDistanceKm,
+                'kilometers' // Internal calculations use kilometers
+            );
+            // Estimate travel time based on average speed (assuming 60 km/h)
+            travelTimeSeconds = (calculatedDistanceKm / 60) * 3600; // Convert hours to seconds
+            displayTravelTime();
+            // Update the distance display
+            document.getElementById('distance-result').innerText = `Total Distance: ${calculatedDistanceKm.toFixed(2)} km`;
             hideLoadingSpinner();
-            displayError('Please select valid start and end locations from the suggestions.');
-            return;
-        }
+        } else {
+            // Use map-based distance calculation
+            const startPlace = startAutocomplete.getPlace();
+            const endPlace = endAutocomplete.getPlace();
 
-        // Collect waypoints (additional stops)
-        const waypoints = [];
-        for (let i = 0; i < stopAutocompletes.length; i++) {
-            const stopPlace = stopAutocompletes[i].getPlace();
-            if (!stopPlace || !stopPlace.geometry) {
+            // Validate that start and end places are valid
+            if (!startPlace || !startPlace.geometry || !endPlace || !endPlace.geometry) {
                 hideLoadingSpinner();
-                displayError(`Please select a valid location for Stop ${i + 1} from the suggestions.`);
+                displayError('Please select valid start and end locations from the suggestions.');
                 return;
             }
-            waypoints.push({
-                location: stopPlace.formatted_address,
-                stopover: true,
-            });
+
+            // Collect waypoints (additional stops)
+            const waypoints = [];
+            for (let i = 0; i < stopAutocompletes.length; i++) {
+                const stopPlace = stopAutocompletes[i].getPlace();
+                if (!stopPlace || !stopPlace.geometry) {
+                    hideLoadingSpinner();
+                    displayError(`Please select a valid location for Stop ${i + 1} from the suggestions.`);
+                    return;
+                }
+                waypoints.push({
+                    location: stopPlace.formatted_address,
+                    stopover: true,
+                });
+            }
+
+            const startLocation = startPlace.formatted_address;
+            const endLocation = endPlace.formatted_address;
+
+            calculateDistance(startLocation, endLocation, waypoints)
+                .then(() => {
+                    // Update the displayed distance
+                    const distanceUnitValue = document.getElementById('distance-unit').value;
+                    const distanceDisplayValue = distanceUnitValue === 'miles'
+                        ? (calculatedDistanceKm / 1.60934).toFixed(2)
+                        : calculatedDistanceKm.toFixed(2);
+                    const unitLabel = distanceUnitValue === 'miles' ? 'miles' : 'km';
+                    document.getElementById('distance-result').innerText = `Total Distance: ${distanceDisplayValue} ${unitLabel}`;
+
+                    // Perform cost and emissions calculations
+                    performCalculations(
+                        fuelEfficiency,
+                        fuelEfficiencyUnit,
+                        fuelPrice,
+                        fuelPriceUnit,
+                        calculatedDistanceKm,
+                        'kilometers' // Use kilometers directly
+                    );
+
+                    // Hide loading spinner
+                    hideLoadingSpinner();
+                })
+                .catch((error) => {
+                    hideLoadingSpinner();
+                    displayError('Error calculating distance: ' + error);
+                });
         }
-
-        const startLocation = startPlace.formatted_address;
-        const endLocation = endPlace.formatted_address;
-
-        calculateDistance(startLocation, endLocation, waypoints)
-            .then(() => {
-                // Update the displayed distance
-                document.getElementById('distance').value = calculatedDistanceKm.toFixed(2);
-                const distanceUnit = document.getElementById('distance-unit').value;
-                document.getElementById('distance-result').innerText = `Total Distance: ${calculatedDistanceKm.toFixed(2)} km`;
-
-                // Perform cost and emissions calculations
-                performCalculations(
-                    fuelEfficiency,
-                    fuelEfficiencyUnit,
-                    fuelPrice,
-                    fuelPriceUnit,
-                    calculatedDistanceKm,
-                    'kilometers' // Use kilometers directly
-                );
-
-                // Hide loading spinner
-                hideLoadingSpinner();
-            })
-            .catch((error) => {
-                hideLoadingSpinner();
-                displayError('Error calculating distance: ' + error);
-            });
     }
 
     // Calculate distance between locations
@@ -433,10 +525,16 @@ if (document.getElementById('map')) {
         // CO₂ emissions (average 2.31 kg CO₂ per liter of petrol)
         const emissions = totalLitersNeeded * 2.31;
 
+        // Determine distance display unit
+        const distanceUnitLabel = distanceUnit === 'kilometers' ? 'km' : 'miles';
+        const distanceDisplay = distanceUnit === 'kilometers'
+            ? `${distanceKm.toFixed(2)} km`
+            : `${(distanceKm / 1.60934).toFixed(2)} miles`;
+
         // Update the DOM with the results
         document.getElementById('cost-result').innerText = `Total Cost: ${currencySymbol}${totalCost.toFixed(2)}`;
         document.getElementById('emissions-result').innerText = `Estimated CO₂ Emissions: ${emissions.toFixed(2)} kg`;
-        document.getElementById('distance-result').innerText = `Total Distance: ${distanceKm.toFixed(2)} km`;
+        document.getElementById('distance-result').innerText = `Total Distance: ${distanceDisplay}`;
     }
 
     // Display travel time
@@ -448,12 +546,15 @@ if (document.getElementById('map')) {
 
     // Convert distance between kilometers and miles
     function convertDistance() {
-        const distanceDisplay = document.getElementById('distance-result');
-        if (distanceDisplay.innerText.includes('km')) {
-            const distanceInMiles = (calculatedDistanceKm / 1.60934).toFixed(2);
-            distanceDisplay.innerText = `Total Distance: ${distanceInMiles} miles`;
-        } else {
-            distanceDisplay.innerText = `Total Distance: ${calculatedDistanceKm.toFixed(2)} km`;
+        const distanceDisplay = document.getElementById('distance-result').innerText;
+        if (distanceDisplay.includes('km')) {
+            const kmValue = parseFloat(distanceDisplay.split(' ')[2]);
+            const distanceInMiles = (kmValue / 1.60934).toFixed(2);
+            document.getElementById('distance-result').innerText = `Total Distance: ${distanceInMiles} miles`;
+        } else if (distanceDisplay.includes('miles')) {
+            const milesValue = parseFloat(distanceDisplay.split(' ')[2]);
+            const distanceInKm = (milesValue * 1.60934).toFixed(2);
+            document.getElementById('distance-result').innerText = `Total Distance: ${distanceInKm} km`;
         }
     }
 
@@ -461,10 +562,7 @@ if (document.getElementById('map')) {
     function resetForm() {
         document.getElementById('journey-form').reset();
         document.getElementById('distance').value = '';
-        document.getElementById('distance-result').innerText = '';
-        document.getElementById('travel-time-result').innerText = '';
-        document.getElementById('cost-result').innerText = '';
-        document.getElementById('emissions-result').innerText = '';
+        clearResults();
         document.getElementById('error-message').innerText = '';
 
         // Clear additional stops
@@ -474,6 +572,9 @@ if (document.getElementById('map')) {
 
         // Clear the map
         directionsRenderer.setDirections({ routes: [] });
+
+        // Reset distance mode to default
+        handleDistanceModeChange();
     }
 
     // Recalculate distance and time from a dragged route
@@ -489,8 +590,12 @@ if (document.getElementById('map')) {
         calculatedDistanceKm = totalDistanceMeters / 1000; // Convert to kilometers
 
         // Update the distance display
-        document.getElementById('distance').value = calculatedDistanceKm.toFixed(2);
-        document.getElementById('distance-result').innerText = `Total Distance: ${calculatedDistanceKm.toFixed(2)} km`;
+        const distanceUnitValue = document.getElementById('distance-unit').value;
+        const distanceDisplayValue = distanceUnitValue === 'miles'
+            ? (calculatedDistanceKm / 1.60934).toFixed(2)
+            : calculatedDistanceKm.toFixed(2);
+        const unitLabel = distanceUnitValue === 'miles' ? 'miles' : 'km';
+        document.getElementById('distance-result').innerText = `Total Distance: ${distanceDisplayValue} ${unitLabel}`;
 
         // Re-perform calculations with new distance
         performCalculations(
@@ -505,6 +610,13 @@ if (document.getElementById('map')) {
         // Update travel time
         displayTravelTime();
     }
-}
 
+    // Utility function to convert distance to kilometers
+    function convertToKilometers(value, unit) {
+        if (unit === 'miles') {
+            return value * 1.60934;
+        }
+        return value;
+    }
+}
 
